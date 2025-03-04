@@ -1,6 +1,6 @@
-#Script to fix broken game mod hashes for Male Rover and YangYang in WWMI.
-#Author: dROY
-#Date: 04-03-2025
+# Script to fix broken game mod hashes for Male Rover and YangYang in WWMI.
+# Author: dROY
+# Date: 04-03-2025
 
 import os
 import re
@@ -8,7 +8,7 @@ import shutil
 import keyboard
 import time  # Import time module to add delays
 
-# Define variables for the old and new hash values
+# Define variables for the old and new hash values for Male Rover (MROVER) and YangYang (YY)
 OLD_HASH_1_MROVER = "d53c2cc7"
 NEW_HASH_1_MROVER = "c9db8418"
 OLD_HASH_2_MROVER = "f8375eb4"
@@ -25,6 +25,20 @@ replacements = {
     OLD_HASH_3_MROVER: NEW_HASH_3_MROVER,
     OLD_HASH_4_YY: NEW_HASH_4_YY
 }
+
+def file_contains_old_hashes(file_path):
+    """
+    Function to check if the file contains any of the old hash values.
+    Returns True if any old hash is found, False otherwise.
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
+
+    # Check if any old hash exists in the file content
+    for old in replacements.keys():
+        if old in content:
+            return True  # Return True if any old hash is found
+    return False  # Return False if no old hash is found
 
 def replace_hex_values(file_path):
     """
@@ -45,7 +59,7 @@ def replace_hex_values(file_path):
     
     print(f"Updated: {file_path}")
     # Add a small delay after modifying each file to make it less suspicious
-    time.sleep(0.5)  # Sleep for 1 second
+    time.sleep(0.1)  # Sleep for 0.1 seconds after updating the file
 
 def create_backup_file(file_path):
     """
@@ -62,12 +76,12 @@ def create_backup_file(file_path):
     shutil.copy(file_path, backup_path)
     print(f"Backup created: {backup_path}")
     # Add a small delay after creating each backup
-    time.sleep(0.5)  # Sleep for 1 second
+    time.sleep(0.1)  # Sleep for 0.1 seconds after creating the backup
 
 def scan_and_replace(directory):
     """
     Function to scan the directory for 'mod.ini' files and replace hex values in them.
-    It will also create backups of the files before making modifications.
+    It will also create backups of the files before making modifications if old hashes are found.
     """
     # Walk through the directory and subdirectories
     for root, _, files in os.walk(directory):
@@ -75,12 +89,18 @@ def scan_and_replace(directory):
             # Check if the file is 'mod.ini' (case-insensitive comparison)
             if file.lower() == "mod.ini":
                 file_path = os.path.join(root, file)
-                # Create a backup of the file
-                create_backup_file(file_path)
-                # Replace hex values in the file
-                replace_hex_values(file_path)
+
+                # Check if the file contains any old hash values before proceeding
+                if file_contains_old_hashes(file_path):
+                    # Create a backup of the file
+                    create_backup_file(file_path)
+                    # Replace hex values in the file
+                    replace_hex_values(file_path)
+                else:
+                    print(f"No old hashes found in: {file_path}")
+
                 # Add a delay after processing each file to slow down the script
-                time.sleep(2)  # Sleep for 2 seconds between files
+                time.sleep(0.1)  # Sleep for 0.1 seconds between files
 
 if __name__ == "__main__":
     # Get the current working directory as the target directory
